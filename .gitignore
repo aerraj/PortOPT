@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.coverage
+*.py[cod]
+*.egg-info/
+.DS_Store
+data/cache/
+reports/*.csv
+reports/*.json
+reports/*.png
+!reports/.gitkeep

@@ -1,0 +1,37 @@
+ticker,name,sector,country,currency
+SAN.MC,Banco Santander,Banks,Spain,EUR
+BBVA.MC,BBVA,Banks,Spain,EUR
+BNP.PA,BNP Paribas,Banks,France,EUR
+GLE.PA,Societe Generale,Banks,France,EUR
+ACA.PA,Credit Agricole,Banks,France,EUR
+INGA.AS,ING Groep,Banks,Netherlands,EUR
+DBK.DE,Deutsche Bank,Banks,Germany,EUR
+CBK.DE,Commerzbank,Banks,Germany,EUR
+ISP.MI,Intesa Sanpaolo,Banks,Italy,EUR
+UCG.MI,UniCredit,Banks,Italy,EUR
+KBC.BR,KBC Group,Banks,Belgium,EUR
+ABN.AS,ABN AMRO,Banks,Netherlands,EUR
+ALV.DE,Allianz,Insurance,Germany,EUR
+CS.PA,AXA,Insurance,France,EUR
+MUV2.DE,Munich Re,Insurance,Germany,EUR
+EN.PA,Bouygues,Industrials,France,EUR
+SIE.DE,Siemens,Industrials,Germany,EUR
+AIR.PA,Airbus,Industrials,France,EUR
+SU.PA,Schneider Electric,Industrials,France,EUR
+ASML.AS,ASML,Technology,Netherlands,EUR
+SAP.DE,SAP,Technology,Germany,EUR
+IFX.DE,Infineon,Technology,Germany,EUR
+MC.PA,LVMH,Consumer,France,EUR
+OR.PA,L'Oreal,Consumer,France,EUR
+ADS.DE,Adidas,Consumer,Germany,EUR
+RMS.PA,Hermes,Consumer,France,EUR
+SAN.PA,Sanofi,Healthcare,France,EUR
+AIR.DE,Air Liquide,Materials,France,EUR
+BAS.DE,BASF,Materials,Germany,EUR
+TTE.PA,TotalEnergies,Energy,France,EUR
+ENI.MI,Eni,Energy,Italy,EUR
+IBE.MC,Iberdrola,Utilities,Spain,EUR
+ENEL.MI,Enel,Utilities,Italy,EUR
+DTE.DE,Deutsche Telekom,Telecom,Germany,EUR
+ORA.PA,Orange,Telecom,France,EUR
+VOW3.DE,Volkswagen,Consumer,Germany,EUR

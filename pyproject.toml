@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "portopt"
+version = "1.0.0"
+description = "Macro-regime-aware long/short portfolio research for Euro-area equities"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Rishabh Raj"}]
+dependencies = [
+  "matplotlib>=3.8,<4",
+  "numpy>=1.26,<3",
+  "pandas>=2.1,<3",
+  "PyYAML>=6.0,<7",
+  "requests>=2.31,<3",
+  "scikit-learn>=1.4,<2",
+  "scipy>=1.11,<2",
+  "yfinance>=0.2.54,<2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pytest-cov>=5,<7", "ruff>=0.8,<1"]
+
+[project.scripts]
+portopt = "portopt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
