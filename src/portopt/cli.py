@@ -8,6 +8,7 @@ from portopt.backtest import run_backtest
 from portopt.config import load_config
 from portopt.data import download_prices, load_universe
 from portopt.macro import build_public_qmi, download_macro
+from portopt.pdf_report import write_portfolio_manager_pdf
 from portopt.regimes import estimate_ou_half_life, gmm_regime_diagnostic
 from portopt.reporting import write_reports
 
@@ -43,8 +44,19 @@ def main() -> None:
     result = run_backtest(prices, benchmark, qmi_frame["qmi"], universe["sector"], config)
     output = Path(config["_root"]) / args.output
     write_reports(result, output)
-    gmm_regime_diagnostic(qmi_frame["qmi"]).to_csv(output / "gmm_diagnostic.csv")
+    gmm = gmm_regime_diagnostic(qmi_frame["qmi"])
+    gmm.to_csv(output / "gmm_diagnostic.csv")
     half_life = estimate_ou_half_life(qmi_frame["qmi"])
+    pdf_path = Path(config["_root"]) / "output" / "pdf" / "PortOPT_Portfolio_Report.pdf"
+    write_portfolio_manager_pdf(
+        result=result,
+        universe=universe,
+        qmi=qmi_frame,
+        half_life=half_life,
+        config=config,
+        performance_chart=output / "performance.png",
+        destination=pdf_path,
+    )
 
     print(f"Observations: {len(result.returns):,}")
     print(f"Final value: ${result.metrics['final_value']:,.2f}")
@@ -53,6 +65,7 @@ def main() -> None:
     print(f"Max drawdown: {result.metrics['max_drawdown']:.2%}")
     print(f"QMI OU half-life: {half_life:.1f} months")
     print(f"Reports: {output}")
+    print(f"Portfolio manager PDF: {pdf_path}")
 
 
 if __name__ == "__main__":

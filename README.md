@@ -79,6 +79,19 @@ Generated files appear in `reports/`:
 - `regimes.csv` and `gmm_diagnostic.csv` - macro-state diagnostics;
 - `performance.png` - equity and drawdown chart.
 
+Every successful run also creates
+`output/pdf/PortOPT_Portfolio_Report.pdf`. This six-page portfolio-manager report is generated
+from the same in-memory backtest result and includes:
+
+- an executive summary and performance chart;
+- the investment process, execution timeline and mandate constraints;
+- calendar-year and QMI-regime performance;
+- current factor, sector and security positioning;
+- model limitations, governance notes and data provenance.
+
+The pipeline reopens the finished PDF and verifies its page count and required sections before
+reporting success.
+
 Run the quality gate with:
 
 ```bash
@@ -134,5 +147,6 @@ src/portopt/regimes.py     rule-based regimes, OU and GMM diagnostics
 src/portopt/optimizer.py   constrained SLSQP allocation
 src/portopt/backtest.py    execution and accounting engine
 src/portopt/reporting.py   reproducible research outputs
+src/portopt/pdf_report.py  portfolio-manager PDF generation and validation
 tests/                     exposure, regime and look-ahead tests
 ```

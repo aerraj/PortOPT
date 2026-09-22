@@ -61,3 +61,12 @@ The automated suite verifies:
 - invariance of historical factor scores when only future prices are changed.
 
 The CI workflow runs Ruff and pytest on Python 3.12 for every push and pull request.
+
+## Portfolio-manager report
+
+At the end of a successful run, the pipeline writes a self-contained PDF to
+`output/pdf/PortOPT_Portfolio_Report.pdf`. The document is built directly from the backtest result,
+universe metadata, QMI series and configuration used in that run. It includes performance, risk,
+regime statistics, factor weights, sector exposures and the largest long and short positions.
+The generated file is reopened with a PDF parser and checked for the expected page count and
+section headings before the command exits successfully.
