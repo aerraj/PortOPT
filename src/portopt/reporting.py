@@ -16,6 +16,7 @@ def write_reports(result: BacktestResult, output_dir: str | Path) -> None:
     result.weights.to_csv(output_dir / "weights.csv", float_format="%.8f")
     result.turnover.to_csv(output_dir / "turnover.csv", float_format="%.8f")
     result.regimes.to_csv(output_dir / "regimes.csv")
+    result.factor_weights.to_csv(output_dir / "factor_weights.csv", float_format="%.8f")
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as handle:
         json.dump(result.metrics, handle, indent=2, sort_keys=True)
 
@@ -33,4 +34,3 @@ def write_reports(result: BacktestResult, output_dir: str | Path) -> None:
     fig.tight_layout()
     fig.savefig(output_dir / "performance.png", dpi=180)
     plt.close(fig)
-

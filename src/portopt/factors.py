@@ -69,3 +69,71 @@ def composite_score(
         total_weight += weight
     return pd.concat(weighted, axis=1).sum(axis=1, min_count=len(weighted)) / total_weight
 
+
+def factor_information_coefficients(
+    factors: dict[str, pd.DataFrame],
+    rebalance_dates: pd.DatetimeIndex,
+    prices: pd.DataFrame,
+) -> pd.DataFrame:
+    """Calculate each signal's next-month rank information coefficient.
+
+    The row indexed by date t uses factor values at t and the return from t to
+    the following rebalance. A strategy running at t can therefore use rows
+    strictly before t, including the result of the immediately prior signal.
+    """
+    month_end_prices = prices.reindex(rebalance_dates)
+    forward_returns = month_end_prices.pct_change(fill_method=None).shift(-1)
+    history = pd.DataFrame(index=rebalance_dates[:-1], columns=factors, dtype=float)
+    for signal_date in history.index:
+        realized = forward_returns.loc[signal_date]
+        for name, frame in factors.items():
+            pair = pd.concat(
+                [frame.loc[signal_date].rename("score"), realized.rename("return")], axis=1
+            ).dropna()
+            if len(pair) >= 10:
+                history.loc[signal_date, name] = pair["score"].corr(
+                    pair["return"], method="spearman"
+                )
+    return history
+
+
+def walk_forward_factor_weights(
+    ic_history: pd.DataFrame,
+    regime_history: pd.Series,
+    signal_date: pd.Timestamp,
+    current_regime: str,
+    cfg: dict,
+) -> pd.Series:
+    """Estimate non-negative factor weights using only previously realized ICs.
+
+    A stable momentum core limits estimation error. The satellite allocation
+    blends overall trailing evidence with evidence from prior occurrences of
+    the current QMI regime, then excludes factors with non-positive evidence.
+    """
+    available = ic_history.loc[ic_history.index < signal_date].tail(
+        int(cfg["factor_ic_lookback"])
+    )
+    names = ic_history.columns
+    core_factor = str(cfg["core_factor"])
+    core_weight = float(cfg["core_weight"])
+    if available.empty:
+        return pd.Series({name: float(name == core_factor) for name in names})
+
+    halflife = float(cfg["factor_ic_halflife"])
+    overall = available.ewm(halflife=halflife, min_periods=3).mean().iloc[-1]
+    past_regimes = regime_history.reindex(available.index)
+    regime_sample = available.loc[past_regimes == current_regime]
+    if len(regime_sample) >= int(cfg["minimum_regime_observations"]):
+        regime_estimate = regime_sample.ewm(halflife=halflife, min_periods=3).mean().iloc[-1]
+        blend = float(cfg["regime_ic_weight"])
+        evidence = (1.0 - blend) * overall + blend * regime_estimate
+    else:
+        evidence = overall
+
+    satellite = evidence.clip(lower=0.0).fillna(0.0)
+    if satellite.sum() == 0:
+        satellite.loc[core_factor] = 1.0
+    satellite /= satellite.sum()
+    weights = satellite * (1.0 - core_weight)
+    weights.loc[core_factor] += core_weight
+    return weights / weights.sum()

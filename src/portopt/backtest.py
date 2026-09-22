@@ -4,7 +4,12 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from portopt.factors import composite_score, compute_factors
+from portopt.factors import (
+    composite_score,
+    compute_factors,
+    factor_information_coefficients,
+    walk_forward_factor_weights,
+)
 from portopt.metrics import performance_metrics
 from portopt.optimizer import optimize_weights
 from portopt.regimes import classify_regimes
@@ -17,6 +22,7 @@ class BacktestResult:
     weights: pd.DataFrame
     turnover: pd.Series
     regimes: pd.Series
+    factor_weights: pd.DataFrame
     metrics: dict[str, float]
 
 
@@ -42,8 +48,10 @@ def run_backtest(
     rebalances = rebalances[rebalances >= prices.index[int(signal_cfg["minimum_history"])] ]
     monthly_qmi = qmi.reindex(rebalances, method="ffill")
     regimes = classify_regimes(monthly_qmi)
+    ic_history = factor_information_coefficients(factors, rebalances, prices)
 
     targets: dict[pd.Timestamp, pd.Series] = {}
+    factor_weight_history: dict[pd.Timestamp, pd.Series] = {}
     previous = pd.Series(0.0, index=prices.columns)
     cov_lb = int(opt_cfg["covariance_lookback"])
     for signal_date in rebalances[:-1]:
@@ -51,12 +59,19 @@ def run_backtest(
         if execution_candidates.empty:
             break
         execution_date = execution_candidates[0]
-        score = composite_score(
-            factors,
-            signal_date,
-            regimes.loc[signal_date],
-            signal_cfg["factor_weights"],
-        )
+        if signal_cfg.get("adaptive_factor_weights", False):
+            factor_weights = walk_forward_factor_weights(
+                ic_history,
+                regimes,
+                signal_date,
+                regimes.loc[signal_date],
+                signal_cfg,
+            ).to_dict()
+            regime_for_tilt = "Adaptive"
+        else:
+            factor_weights = signal_cfg["factor_weights"]
+            regime_for_tilt = regimes.loc[signal_date]
+        score = composite_score(factors, signal_date, regime_for_tilt, factor_weights)
         history = returns.loc[:signal_date].tail(cov_lb)
         eligible = history.notna().mean()[lambda x: x >= 0.95].index.intersection(score.dropna().index)
         if len(eligible) < 10:
@@ -66,6 +81,7 @@ def run_backtest(
             score.loc[eligible], covariance, sectors, previous, opt_cfg, float(signal_cfg["tail_fraction"])
         ).reindex(prices.columns).fillna(0.0)
         targets[execution_date] = weights
+        factor_weight_history[signal_date] = pd.Series(factor_weights, dtype=float)
         previous = weights
 
     if not targets:
@@ -96,6 +112,6 @@ def run_backtest(
         weights=weight_frame.loc[start:],
         turnover=daily_turnover.loc[start:].rename("turnover"),
         regimes=regimes,
+        factor_weights=pd.DataFrame(factor_weight_history).T,
         metrics=metrics,
     )
-

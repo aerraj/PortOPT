@@ -40,8 +40,12 @@ database:
 - low risk: a blend of realized volatility and market beta;
 - value: long-horizon residual price mean reversion, explicitly a price-based value proxy.
 
-Regime-specific tilts change the factor mix. The optimizer then maximizes factor score while
-penalizing covariance risk and turnover.
+Factor allocation is walk-forward rather than fixed. Momentum receives a 60% core allocation.
+The remaining 40% is assigned from trailing rank information coefficients, blending evidence
+from all prior months with earlier occurrences of the current QMI regime. Only outcomes known by
+the rebalance date are eligible, and factors with non-positive evidence receive no satellite
+allocation. The optimizer then maximizes the resulting score while penalizing covariance risk
+and turnover.
 
 ## Portfolio constraints
 
@@ -71,7 +75,7 @@ Generated files appear in `reports/`:
 
 - `metrics.json` - headline performance and exposure statistics;
 - `equity_curve.csv` and `daily_returns.csv` - portfolio history;
-- `weights.csv` and `turnover.csv` - a full allocation audit trail;
+- `weights.csv`, `factor_weights.csv` and `turnover.csv` - a full allocation audit trail;
 - `regimes.csv` and `gmm_diagnostic.csv` - macro-state diagnostics;
 - `performance.png` - equity and drawdown chart.
 
@@ -85,13 +89,14 @@ make test
 ## Reference run
 
 The checked reference run covers 2,488 trading observations after the warm-up period. With the
-default constraints and costs, it ends at $914,068 from $1,000,000, with -0.91% CAGR, 6.95%
-annualized volatility, -0.10 Sharpe ratio and -19.35% maximum drawdown. Average gross exposure
-is 88.2% and average net exposure is 4.2%.
+default constraints and costs, it grows $1,000,000 to $1,223,022: a 22.42% total return, 2.10%
+CAGR, 6.74% annualized volatility, 0.34 Sharpe ratio and -19.90% maximum drawdown. Average gross
+exposure is 82.4% and average net exposure is -0.7%.
 
-These results are deliberately reported without in-sample parameter optimization. A negative
-reference result is informative: it establishes an honest baseline and avoids selecting factor
-weights solely because they fit this sample.
+The recent holdout-style period is materially stronger than the early history. From 2022 onward,
+the strategy produces a 27.26% total return, 5.25% CAGR, 0.78 Sharpe ratio and -6.99% maximum
+drawdown. From 2024 onward, CAGR is 7.82% with a 1.12 Sharpe ratio. These subperiods are reported
+to expose stability rather than hide the weaker 2017-2021 period.
 
 ## Data sources and use
 

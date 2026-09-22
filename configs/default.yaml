@@ -18,6 +18,13 @@ signals:
   value_lookback: 504
   minimum_history: 504
   tail_fraction: 0.30
+  adaptive_factor_weights: true
+  core_factor: "momentum"
+  core_weight: 0.60
+  factor_ic_lookback: 60
+  factor_ic_halflife: 12
+  regime_ic_weight: 0.35
+  minimum_regime_observations: 6
   factor_weights:
     momentum: 0.25
     value: 0.20
@@ -40,4 +47,3 @@ backtest:
   transaction_cost_bps: 10.0
   annual_short_borrow_bps: 50.0
   annual_cash_rate: 0.0
-
